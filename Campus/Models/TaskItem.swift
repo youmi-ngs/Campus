@@ -1,0 +1,154 @@
+import Foundation
+import SwiftData
+
+/// やることの種類。
+enum TaskKind: String, CaseIterable, Identifiable, Codable, Sendable {
+    /// 授業の開始直後に、学内サイトで出席を押したか確認する。
+    case attendance
+    case feedbackSheet
+    /// 毎週出る課題。
+    case assignment
+    /// 学期末の最終課題。回ごとではなく授業にひとつだけ。
+    case finalAssignment
+
+    var id: String { rawValue }
+
+    var defaultLabel: String {
+        switch self {
+        case .attendance: return "Attendance"
+        case .feedbackSheet: return "FS"
+        case .assignment: return "Assignment"
+        case .finalAssignment: return "Final project"
+        }
+    }
+
+    var shortLabel: String {
+        switch self {
+        case .attendance: return "Attendance"
+        case .feedbackSheet: return "FS"
+        case .assignment: return "Assignment"
+        case .finalAssignment: return "Final"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .attendance: return "person.crop.circle.badge.checkmark"
+        case .feedbackSheet: return "doc.text"
+        case .assignment: return "pencil.and.list.clipboard"
+        case .finalAssignment: return "flag.checkered"
+        }
+    }
+
+    /// 毎週の授業から繰り返し作られる種類かどうか。最終課題だけ例外。
+    var isRecurring: Bool { self != .finalAssignment }
+
+    /// 日単位ではなく、授業開始からの分で計るリマインドかどうか。
+    var isMinuteBased: Bool { self == .attendance }
+
+    /// コマごとに1件作る種類かどうか。
+    /// 出席はコマごとに押す必要があり、FS もコマごとに1枚書く必要がある。
+    var isPerPeriod: Bool { self == .attendance || self == .feedbackSheet }
+}
+
+/// 授業から自動で作られる、あるいは手で足した1件のやること。
+@Model
+final class TaskItem {
+    /// 通知の識別子と検索キーを兼ねる。
+    var uid: UUID = UUID()
+    var kindRaw: String = TaskKind.feedbackSheet.rawValue
+    /// 元になった授業の日時（手動で足したものは作成日）。
+    var classDate: Date = Date.now
+    /// リマインドが来る日時。
+    var dueDate: Date = Date.now
+    var isDone: Bool = false
+    var completedAt: Date?
+    /// 手で追加したものは授業予定と同期させず、消さない。
+    var isManual: Bool = false
+    /// 手動タスクのタイトル（自動生成のものは空）。
+    var customTitle: String = ""
+    /// 出席と FS は限ごとに1件作るので、どのコマのものかを持っておく。ほかの種類は 0。
+    var period: Int = 0
+    var memo: String = ""
+
+    var course: Course?
+
+    init(
+        kind: TaskKind,
+        classDate: Date,
+        dueDate: Date,
+        course: Course?,
+        isManual: Bool = false,
+        customTitle: String = ""
+    ) {
+        self.uid = UUID()
+        self.kindRaw = kind.rawValue
+        self.classDate = classDate
+        self.dueDate = dueDate
+        self.course = course
+        self.isManual = isManual
+        self.customTitle = customTitle
+        self.isDone = false
+    }
+
+    var kind: TaskKind {
+        get { TaskKind(rawValue: kindRaw) ?? .assignment }
+        set { kindRaw = newValue.rawValue }
+    }
+
+    var title: String {
+        if !customTitle.isEmpty { return customTitle }
+        return course?.label(for: kind) ?? kind.defaultLabel
+    }
+
+    var courseName: String { course?.displayName ?? "No course" }
+
+    var prompt: String {
+        course?.prompt(for: kind) ?? "Have you finished \(title)?"
+    }
+
+    var isOverdue: Bool {
+        !isDone && dueDate < .now
+    }
+
+    /// 通知を出す日時。課題と最終課題は、期限の何日か前に知らせる。
+    var notifyDate: Date {
+        guard !isManual, let course else { return dueDate }
+        return course.notifyDate(forDeadline: dueDate, kind: kind)
+    }
+
+    /// コマごとに作る種類のときだけ、どのコマのものかを返す。
+    var periodText: String? {
+        guard kind.isPerPeriod, period > 0 else { return nil }
+        return "P\(period)"
+    }
+
+    /// 出席をサイトで押せる締め切り。授業開始から設定した分数まで。
+    var attendanceDeadline: Date? {
+        guard kind == .attendance, let course else { return nil }
+        return Calendar.current.date(
+            byAdding: .minute,
+            value: max(1, course.attendanceWindowMinutes),
+            to: classDate
+        )
+    }
+
+    /// 「Oct 7 (Tue)」のような、どの回のものか分かる説明。
+    var classDateText: String {
+        classDate.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated))
+    }
+
+    var dueText: String {
+        let calendar = Calendar.current
+        let time = dueDate.formatted(date: .omitted, time: .shortened)
+        if calendar.isDateInToday(dueDate) { return "Today \(time)" }
+        if calendar.isDateInTomorrow(dueDate) { return "Tomorrow \(time)" }
+        if calendar.isDateInYesterday(dueDate) { return "Yesterday \(time)" }
+        return dueDate.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).hour().minute())
+    }
+
+    func markDone(_ done: Bool) {
+        isDone = done
+        completedAt = done ? .now : nil
+    }
+}
