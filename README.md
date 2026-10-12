@@ -3,6 +3,8 @@
 大学の時間割と、出席・FS・課題を管理する iOS アプリ。
 SwiftUI + SwiftData / iOS 18.0 以降。UI の言語は英語。
 
+プライバシーポリシーは [PRIVACY.md](PRIVACY.md)。データは端末内だけで、通信もアカウントもない。
+
 ## 開く
 
 ```sh
