@@ -4,11 +4,14 @@ import UserNotifications
 
 /// 通知1件分の内容。SwiftData のモデルを跨いで持ち回さないよう値型にしておく。
 struct ReminderPlan: Sendable {
+    /// 通知そのものの識別子。試験は1件のやることから複数出すので uid とは別にする。
     var id: String
+    /// 「完了にする」で対象にするやること。
+    var taskUID: String
     var title: String
     var body: String
     var subtitle: String
-    var fireDate: DateComponents
+    var fireAt: Date
 }
 
 /// 通知の許可・登録・貼り替えをまとめて扱う。
@@ -88,10 +91,14 @@ final class NotificationManager {
             content.body = plan.body
             content.sound = .default
             content.categoryIdentifier = Self.categoryIdentifier
-            content.userInfo = ["taskUID": plan.id]
+            content.userInfo = ["taskUID": plan.taskUID]
             content.interruptionLevel = .active
 
-            let trigger = UNCalendarNotificationTrigger(dateMatching: plan.fireDate, repeats: false)
+            let components = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute],
+                from: plan.fireAt
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
             let request = UNNotificationRequest(identifier: plan.id, content: content, trigger: trigger)
             try? await center.add(request)
         }

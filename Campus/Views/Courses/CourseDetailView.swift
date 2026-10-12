@@ -10,6 +10,8 @@ struct CourseDetailView: View {
 
     @State private var isEditing = false
     @State private var isConfirmingDelete = false
+    @State private var examBeingEdited: Exam?
+    @State private var isAddingExam = false
 
     private var upcomingTasks: [TaskItem] {
         course.tasks
@@ -26,6 +28,7 @@ struct CourseDetailView: View {
             attendanceSection
             if !course.itemList.isEmpty { itemsSection }
             reminderSummarySection
+            examsSection
             if !upcomingTasks.isEmpty { upcomingSection }
             if !course.note.isEmpty { noteSection }
             deleteSection
@@ -40,6 +43,12 @@ struct CourseDetailView: View {
         }
         .sheet(isPresented: $isEditing) {
             CourseEditView(mode: .edit(course))
+        }
+        .sheet(isPresented: $isAddingExam) {
+            ExamEditView(mode: .create(course: course))
+        }
+        .sheet(item: $examBeingEdited) { exam in
+            ExamEditView(mode: .edit(exam))
         }
         .confirmationDialog(
             "Delete “\(course.displayName)”?",
@@ -256,6 +265,49 @@ struct CourseDetailView: View {
             }
         }
         .padding(.vertical, 2)
+    }
+
+    private var examsSection: some View {
+        Section {
+            ForEach(course.sortedExams) { exam in
+                Button {
+                    examBeingEdited = exam
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(exam.displayTitle)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(exam.dateText)
+                                .font(.subheadline)
+                                .foregroundStyle(exam.date < .now ? .secondary : Color.accentColor)
+                        }
+                        if !exam.room.isEmpty {
+                            Label(exam.room, systemImage: "mappin.and.ellipse")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        if !exam.note.isEmpty {
+                            Text(exam.note)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            Button {
+                isAddingExam = true
+            } label: {
+                Label("Add Exam", systemImage: "plus.circle.fill")
+            }
+        } header: {
+            Label("Exams", systemImage: TaskKind.exam.symbolName)
+        } footer: {
+            Text("Two reminders are sent before each exam. They also show up under To-Do.")
+        }
     }
 
     private var upcomingSection: some View {

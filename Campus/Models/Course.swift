@@ -77,6 +77,9 @@ final class Course {
     @Relationship(deleteRule: .cascade, inverse: \TaskItem.course)
     var tasks: [TaskItem] = []
 
+    @Relationship(deleteRule: .cascade, inverse: \Exam.course)
+    var exams: [Exam] = []
+
     init(
         name: String = "",
         teacher: String = "",
@@ -189,16 +192,22 @@ final class Course {
         TaskKind.allCases.filter { isEnabled($0) }
     }
 
-    /// 表示名を変えられるのは最終課題だけ。ほかは種類の名前をそのまま使う。
+    /// 表示名を変えられるのは最終課題だけ。試験は各 Exam が名前を持つ。
     func label(for kind: TaskKind) -> String {
         guard kind == .finalAssignment else { return kind.defaultLabel }
         return finalTitle.isEmpty ? TaskKind.finalAssignment.defaultLabel : finalTitle
+    }
+
+    var sortedExams: [Exam] {
+        exams.sorted { $0.date < $1.date }
     }
 
     func prompt(for kind: TaskKind) -> String {
         switch kind {
         case .attendance:
             return attendancePrompt.isEmpty ? autoAttendancePrompt : attendancePrompt
+        case .exam:
+            return "You have an exam coming up."
         case .finalAssignment:
             return "\(label(for: kind)) is due \(finalDueDate.formatted(.dateTime.month(.abbreviated).day()))."
         case .feedbackSheet:
@@ -210,7 +219,7 @@ final class Course {
 
     func delayDays(for kind: TaskKind) -> Int {
         switch kind {
-        case .attendance, .finalAssignment: return 0
+        case .attendance, .finalAssignment, .exam: return 0
         case .feedbackSheet: return Self.fsDelayDays
         case .assignment: return max(0, assignmentDueDays)
         }
@@ -254,7 +263,7 @@ final class Course {
 
     func reminderTime(for kind: TaskKind) -> (hour: Int, minute: Int) {
         switch kind {
-        case .attendance: return (0, 0)
+        case .attendance, .exam: return (0, 0)
         case .finalAssignment: return (finalReminderHour, finalReminderMinute)
         case .feedbackSheet: return (fsReminderHour, fsReminderMinute)
         case .assignment: return (assignmentReminderHour, assignmentReminderMinute)
@@ -268,6 +277,7 @@ final class Course {
         case .feedbackSheet: return fsEnabled
         case .assignment: return assignmentEnabled
         case .finalAssignment: return finalEnabled
+        case .exam: return !exams.isEmpty
         }
     }
 }

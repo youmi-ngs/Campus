@@ -45,7 +45,13 @@ struct TaskRow: View {
                         }
                         Text("·")
                         Text("open until \(deadline.formatted(date: .omitted, time: .shortened))")
-                    } else if !task.isManual {
+                    } else if task.kind == .exam {
+                        if let room = task.exam?.room, !room.isEmpty {
+                            Text("·")
+                            Text(room)
+                        }
+                    } else if !task.isManual, task.kind.isRecurring {
+                        // 試験や最終課題は授業の回に対応しないので、授業名の参照は出さない。
                         Text("·")
                         Text(classReferenceText)
                     }

@@ -83,6 +83,15 @@ struct TaskListView: View {
                 placeholder: kindFilter == nil ? "Nothing due through \(through)." : nil
             ))
         }
+        if !groups.exams.isEmpty {
+            result.append(Bucket(
+                id: "exam",
+                title: "Exams",
+                footer: nil,
+                items: groups.exams,
+                placeholder: nil
+            ))
+        }
         if !groups.later.isEmpty {
             result.append(Bucket(id: "later", title: "Later", footer: nil, items: groups.later, placeholder: nil))
         }

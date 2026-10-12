@@ -8,12 +8,13 @@ enum TaskBoard {
         var thisWeek: [TaskItem] = []
         var later: [TaskItem] = []
         var finals: [TaskItem] = []
+        var exams: [TaskItem] = []
         /// 「Next 7 days」が含む最後の日。
         var lastDay: Date = .now
 
         /// To-Do に並ぶ件数。タブバーのバッジもこれを使う。
         var count: Int {
-            checkIn.count + thisWeek.count + later.count + finals.count
+            checkIn.count + thisWeek.count + later.count + finals.count + exams.count
         }
     }
 
@@ -46,13 +47,16 @@ enum TaskBoard {
         // FS は授業当日・翌日・2日後（期限日）の3日間が窓になる。
         let thisWeek = open
             .filter {
-                guard $0.kind != .attendance, $0.kind != .finalAssignment else { return false }
+                guard $0.kind != .attendance, $0.kind != .finalAssignment, $0.kind != .exam else { return false }
                 guard $0.dueDate >= today, $0.dueDate < weekEnd else { return false }
                 return $0.isManual || $0.classDate <= now
             }
             .sorted(by: inOrder)
 
         let later = open.filter { $0.isManual && $0.dueDate >= weekEnd }
+        let exams = open
+            .filter { $0.kind == .exam }
+            .sorted { $0.dueDate < $1.dueDate }
         let finals = open
             .filter { $0.kind == .finalAssignment }
             .sorted { $0.dueDate < $1.dueDate }
@@ -62,6 +66,7 @@ enum TaskBoard {
             thisWeek: thisWeek,
             later: later,
             finals: finals,
+            exams: exams,
             lastDay: lastDay
         )
     }

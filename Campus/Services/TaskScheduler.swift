@@ -18,6 +18,8 @@ enum TaskScheduler {
         var classDate: Date
         var period: Int
         var dueDate: Date
+        var examUID: UUID?
+        var title: String?
     }
 
     /// 出席と FS はコマ単位。連続コマでも、押すのも書くのもコマごとに必要なため。
@@ -65,9 +67,12 @@ enum TaskScheduler {
                         task.classDate = wanted.classDate
                         task.dueDate = wanted.dueDate
                         task.period = wanted.period
+                        task.examUID = wanted.examUID
+                        task.customTitle = wanted.title ?? ""
                     }
                 } else if !task.isDone,
                           task.kind == .finalAssignment
+                            || task.kind == .exam
                             // 過去の回でも、休講にしたぶんは片付ける。
                             || course.isCancelled(on: task.classDate, calendar: calendar)
                             || (key.day >= historyStart && key.day <= windowEnd) {
@@ -84,6 +89,8 @@ enum TaskScheduler {
                     course: course
                 )
                 task.period = value.period
+                task.examUID = value.examUID
+                task.customTitle = value.title ?? ""
                 context.insert(task)
             }
         }
@@ -125,6 +132,18 @@ enum TaskScheduler {
         if course.finalEnabled {
             let finalKey = key(kind: .finalAssignment, day: calendar.startOfDay(for: course.finalDueDate), period: 0)
             result[finalKey] = Desired(classDate: course.finalDueDate, period: 0, dueDate: course.finalDueDate)
+        }
+
+        // 試験も日時そのものが決め手。同じ授業で同じ日に2つは入らない前提。
+        for exam in course.exams {
+            let examKey = key(kind: .exam, day: calendar.startOfDay(for: exam.date), period: 0)
+            result[examKey] = Desired(
+                classDate: exam.date,
+                period: 0,
+                dueDate: exam.date,
+                examUID: exam.uid,
+                title: exam.displayTitle
+            )
         }
 
         let kinds = course.enabledReminderKinds.filter(\.isRecurring)
@@ -263,21 +282,35 @@ enum TaskScheduler {
         let tasks = (try? context.fetch(descriptor)) ?? []
 
         let overdue = tasks.filter { $0.dueDate <= now }.count
-        let plans = tasks
-            .filter { $0.notifyDate > now }
-            .sorted { $0.notifyDate < $1.notifyDate }
-            .map { task in
-                ReminderPlan(
-                    id: task.uid.uuidString,
-                    title: task.courseName,
-                    body: task.prompt,
-                    subtitle: subtitle(for: task),
-                    fireDate: calendar.dateComponents(
-                        [.year, .month, .day, .hour, .minute],
-                        from: task.notifyDate
-                    )
-                )
+
+        var plans: [ReminderPlan] = []
+        for task in tasks {
+            // 試験だけは「1週間前」「前日」のように複数回知らせる。
+            if task.kind == .exam, let exam = task.exam {
+                for (index, fireAt) in exam.reminderDates(calendar: calendar).enumerated() where fireAt > now {
+                    plans.append(ReminderPlan(
+                        id: "\(task.uid.uuidString)-\(index)",
+                        taskUID: task.uid.uuidString,
+                        title: task.courseName,
+                        body: task.prompt,
+                        subtitle: subtitle(for: task),
+                        fireAt: fireAt
+                    ))
+                }
+                continue
             }
+
+            guard task.notifyDate > now else { continue }
+            plans.append(ReminderPlan(
+                id: task.uid.uuidString,
+                taskUID: task.uid.uuidString,
+                title: task.courseName,
+                body: task.prompt,
+                subtitle: subtitle(for: task),
+                fireAt: task.notifyDate
+            ))
+        }
+        plans.sort { $0.fireAt < $1.fireAt }
 
         return (plans, overdue)
     }
@@ -289,6 +322,10 @@ enum TaskScheduler {
             // 連続コマは通知が続けて届くので、どのコマのぶんか分かるようにする。
             guard let periodText = task.periodText else { return until }
             return "\(periodText) · \(until)"
+        }
+        if let exam = task.exam {
+            let room = exam.room.isEmpty ? "" : " · \(exam.room)"
+            return "\(exam.dateText)\(room)"
         }
         if task.kind == .finalAssignment {
             return "Due \(task.dueDate.formatted(.dateTime.month(.abbreviated).day()))"

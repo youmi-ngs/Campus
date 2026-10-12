@@ -10,6 +10,8 @@ enum TaskKind: String, CaseIterable, Identifiable, Codable, Sendable {
     case assignment
     /// 学期末の最終課題。回ごとではなく授業にひとつだけ。
     case finalAssignment
+    /// 試験。授業にひもづけて日時を登録する。
+    case exam
 
     var id: String { rawValue }
 
@@ -19,6 +21,7 @@ enum TaskKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .feedbackSheet: return "FS"
         case .assignment: return "Assignment"
         case .finalAssignment: return "Final project"
+        case .exam: return "Exam"
         }
     }
 
@@ -28,6 +31,7 @@ enum TaskKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .feedbackSheet: return "FS"
         case .assignment: return "Assignment"
         case .finalAssignment: return "Final"
+        case .exam: return "Exam"
         }
     }
 
@@ -37,11 +41,12 @@ enum TaskKind: String, CaseIterable, Identifiable, Codable, Sendable {
         case .feedbackSheet: return "doc.text"
         case .assignment: return "pencil.and.list.clipboard"
         case .finalAssignment: return "flag.checkered"
+        case .exam: return "pencil.and.ruler"
         }
     }
 
-    /// 毎週の授業から繰り返し作られる種類かどうか。最終課題だけ例外。
-    var isRecurring: Bool { self != .finalAssignment }
+    /// 毎週の授業から繰り返し作られる種類かどうか。最終課題と試験は例外。
+    var isRecurring: Bool { self != .finalAssignment && self != .exam }
 
     /// 日単位ではなく、授業開始からの分で計るリマインドかどうか。
     var isMinuteBased: Bool { self == .attendance }
@@ -69,6 +74,8 @@ final class TaskItem {
     var customTitle: String = ""
     /// 出席と FS は限ごとに1件作るので、どのコマのものかを持っておく。ほかの種類は 0。
     var period: Int = 0
+    /// 試験のときだけ、どの試験のものかを指す。
+    var examUID: UUID?
     var memo: String = ""
 
     var course: Course?
@@ -103,8 +110,16 @@ final class TaskItem {
 
     var courseName: String { course?.displayName ?? "No course" }
 
+    var exam: Exam? {
+        guard let examUID else { return nil }
+        return course?.exams.first { $0.uid == examUID }
+    }
+
     var prompt: String {
-        course?.prompt(for: kind) ?? "Have you finished \(title)?"
+        if let exam {
+            return "\(exam.displayTitle) is on \(exam.dateText)."
+        }
+        return course?.prompt(for: kind) ?? "Have you finished \(title)?"
     }
 
     var isOverdue: Bool {
