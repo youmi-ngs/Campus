@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		1A1A000000000000000000A5 /* Campus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Campus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A1A000000000000000000A5 /* Koma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Koma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A1A000000000000000000AF /* Campus */ = {
+		1A1A000000000000000000AF /* Koma */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Campus;
+			path = Koma;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		1A1A000000000000000000A2 = {
 			isa = PBXGroup;
 			children = (
-				1A1A000000000000000000AF /* Campus */,
+				1A1A000000000000000000AF /* Koma */,
 				1A1A000000000000000000A3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		1A1A000000000000000000A3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1A1A000000000000000000A5 /* Campus.app */,
+				1A1A000000000000000000A5 /* Koma.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1A1A000000000000000000A4 /* Campus */ = {
+		1A1A000000000000000000A4 /* Koma */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1A1A000000000000000000AA /* Build configuration list for PBXNativeTarget "Campus" */;
+			buildConfigurationList = 1A1A000000000000000000AA /* Build configuration list for PBXNativeTarget "Koma" */;
 			buildPhases = (
 				1A1A000000000000000000A6 /* Sources */,
 				1A1A000000000000000000A7 /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				1A1A000000000000000000AF /* Campus */,
+				1A1A000000000000000000AF /* Koma */,
 			);
-			name = Campus;
+			name = Koma;
 			packageProductDependencies = (
 			);
-			productName = Campus;
-			productReference = 1A1A000000000000000000A5 /* Campus.app */;
+			productName = Koma;
+			productReference = 1A1A000000000000000000A5 /* Koma.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 1A1A000000000000000000A9 /* Build configuration list for PBXProject "Campus" */;
+			buildConfigurationList = 1A1A000000000000000000A9 /* Build configuration list for PBXProject "Koma" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1A1A000000000000000000A4 /* Campus */,
+				1A1A000000000000000000A4 /* Koma */,
 			);
 		};
 /* End PBXProject section */
@@ -224,7 +224,7 @@
 				DEVELOPMENT_TEAM = 838A2GG6YV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Campus;
+				INFOPLIST_KEY_CFBundleDisplayName = Koma;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -236,7 +236,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ngs.Campus;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ngs.Koma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -254,7 +254,7 @@
 				DEVELOPMENT_TEAM = 838A2GG6YV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Campus;
+				INFOPLIST_KEY_CFBundleDisplayName = Koma;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -266,7 +266,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ngs.Campus;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ngs.Koma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -277,7 +277,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1A1A000000000000000000A9 /* Build configuration list for PBXProject "Campus" */ = {
+		1A1A000000000000000000A9 /* Build configuration list for PBXProject "Koma" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1A1A000000000000000000AB /* Debug */,
@@ -286,7 +286,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1A1A000000000000000000AA /* Build configuration list for PBXNativeTarget "Campus" */ = {
+		1A1A000000000000000000AA /* Build configuration list for PBXNativeTarget "Koma" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1A1A000000000000000000AD /* Debug */,

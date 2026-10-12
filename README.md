@@ -1,4 +1,4 @@
-# Campus
+# Koma
 
 大学の時間割と、出席・FS・課題を管理する iOS アプリ。
 SwiftUI + SwiftData / iOS 18.0 以降。UI の言語は英語。
@@ -8,21 +8,21 @@ SwiftUI + SwiftData / iOS 18.0 以降。UI の言語は英語。
 ## 開く
 
 ```sh
-open /Users/youmi/Dev/Campus/Campus.xcodeproj
+open /Users/youmi/Dev/Koma/Koma.xcodeproj
 ```
 
-Bundle ID は `io.ngs.Campus`。実機で動かすときは Signing & Capabilities で Team を選ぶ。
+Bundle ID は `io.ngs.Koma`。実機で動かすときは Signing & Capabilities で Team を選ぶ。
 
 ## 構成
 
 | 場所 | 役割 |
 | --- | --- |
-| `Campus/Models` | `Semester` / `Course` / `Meeting` / `TaskItem`（SwiftData） |
-| `Campus/Services` | やることの生成（`TaskScheduler`）・仕分け（`TaskBoard`）・通知（`NotificationManager`） |
-| `Campus/Views/Timetable` | 時間割タブ（今日の授業 + 週表） |
-| `Campus/Views/Courses` | 授業の一覧・詳細・編集 |
-| `Campus/Views/Tasks` | やること一覧・History・手動追加 |
-| `Campus/Views/Settings` | 学期・コマの時間・通知 |
+| `Koma/Models` | `Semester` / `Course` / `Meeting` / `TaskItem`（SwiftData） |
+| `Koma/Services` | やることの生成（`TaskScheduler`）・仕分け（`TaskBoard`）・通知（`NotificationManager`） |
+| `Koma/Views/Timetable` | 時間割タブ（今日の授業 + 週表） |
+| `Koma/Views/Courses` | 授業の一覧・詳細・編集 |
+| `Koma/Views/Tasks` | やること一覧・History・手動追加 |
+| `Koma/Views/Settings` | 学期・コマの時間・通知 |
 
 ## リマインドの4種類
 
@@ -97,7 +97,7 @@ FS は**授業当日から期限（2日後）までの3日間**ずっと出る�
 
 ## 初期データ
 
-初回起動時に作るのは学期とコマの時間だけ（`Campus/Support/SemesterPicker.swift` の `SeedService`）。
+初回起動時に作るのは学期とコマの時間だけ（`Koma/Support/SemesterPicker.swift` の `SeedService`）。
 授業は入っていないので、時間割の空きマスから自分で足す。土曜は既定で表示する。
 
 | 限 | 時間 |

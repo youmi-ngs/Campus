@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 @main
-struct CampusApp: App {
+struct KomaApp: App {
     init() {
         AppContainer.seedIfNeeded()
     }

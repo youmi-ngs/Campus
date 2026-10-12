@@ -1,8 +1,8 @@
-# Campus プライバシーポリシー
+# Koma プライバシーポリシー
 
 最終更新: 2026年10月12日
 
-Campus（以下「本アプリ」）は、大学の時間割と、出席・フィードバックシート・課題・試験の管理を行う iOS アプリです。本アプリにおける利用者情報の取り扱いについて、以下のとおり定めます。
+Koma（以下「本アプリ」）は、大学の時間割と、出席・フィードバックシート・課題・試験の管理を行う iOS アプリです。本アプリにおける利用者情報の取り扱いについて、以下のとおり定めます。
 
 ## 収集する情報
 
@@ -28,11 +28,11 @@ Campus（以下「本アプリ」）は、大学の時間割と、出席・フ�
 
 ---
 
-# Campus Privacy Policy
+# Koma Privacy Policy
 
 Last updated: 12 October 2026
 
-Campus is an iOS app for keeping track of a university timetable along with attendance, feedback sheets, assignments, and exams.
+Koma is an iOS app for keeping track of a university timetable along with attendance, feedback sheets, assignments, and exams.
 
 ## Information we collect
 
