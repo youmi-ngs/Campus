@@ -268,11 +268,12 @@ enum TaskScheduler {
     }
 
     /// 未完了のやることから通知の予定表を作る。
+    /// あわせて、アプリアイコンのバッジに出す件数（To-Do タブと同じ）も返す。
     @MainActor
     static func reminderPlans(
         in context: ModelContext,
         now: Date = .now
-    ) -> (plans: [ReminderPlan], overdueCount: Int) {
+    ) -> (plans: [ReminderPlan], badgeCount: Int) {
         let calendar = Calendar.current
         var descriptor = FetchDescriptor<TaskItem>(
             predicate: #Predicate { $0.isDone == false },
@@ -281,7 +282,8 @@ enum TaskScheduler {
         descriptor.fetchLimit = 400
         let tasks = (try? context.fetch(descriptor)) ?? []
 
-        let overdue = tasks.filter { $0.dueDate <= now }.count
+        // アイコンのバッジは To-Do タブの件数に合わせる。期限切れの数ではない。
+        let badgeCount = TaskBoard.groups(from: tasks, now: now).count
 
         var plans: [ReminderPlan] = []
         for task in tasks {
@@ -312,7 +314,7 @@ enum TaskScheduler {
         }
         plans.sort { $0.fireAt < $1.fireAt }
 
-        return (plans, overdue)
+        return (plans, badgeCount)
     }
 
     /// 通知の2行目。出席は締め切りを出し、それ以外はどの回の分かを出す。
@@ -357,7 +359,7 @@ final class TaskSyncCoordinator {
         let result = TaskScheduler.reminderPlans(in: context)
         await NotificationManager.shared.reschedule(
             with: result.plans,
-            badgeCount: result.overdueCount
+            badgeCount: result.badgeCount
         )
     }
 }
