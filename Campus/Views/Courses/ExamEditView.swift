@@ -14,6 +14,8 @@ struct ExamEditView: View {
     private let mode: Mode
     @State private var title: String
     @State private var date: Date
+    /// 授業の回から選んだときの限。自由入力なら 0。
+    @State private var period: Int
     @State private var room: String
     @State private var note: String
     @State private var firstReminderDaysBefore: Int
@@ -28,6 +30,7 @@ struct ExamEditView: View {
             let suggested = calendar.date(byAdding: .day, value: 14, to: .now) ?? .now
             _title = State(initialValue: "")
             _date = State(initialValue: calendar.date(bySettingHour: 13, minute: 0, second: 0, of: suggested) ?? suggested)
+            _period = State(initialValue: 0)
             _room = State(initialValue: "")
             _note = State(initialValue: "")
             _firstReminderDaysBefore = State(initialValue: 7)
@@ -36,6 +39,7 @@ struct ExamEditView: View {
         case let .edit(exam):
             _title = State(initialValue: exam.title)
             _date = State(initialValue: exam.date)
+            _period = State(initialValue: exam.period)
             _room = State(initialValue: exam.room)
             _note = State(initialValue: exam.note)
             _firstReminderDaysBefore = State(initialValue: exam.firstReminderDaysBefore)
@@ -60,15 +64,58 @@ struct ExamEditView: View {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// 今日以降の授業の回。すでに過ぎた回のぶんも編集中なら選べるよう、保存済みの日時から数える。
+    private var sessions: [ClassDays.Session] {
+        guard let course else { return [] }
+        let from = min(date, .now)
+        return ClassDays.upcomingSessions(for: course, from: from)
+    }
+
+    /// 選択中の回。限と開始時刻が一致するものを現在の選択とみなす。
+    private var sessionSelection: Binding<String?> {
+        Binding(
+            get: {
+                guard period > 0 else { return nil }
+                return sessions.first { $0.period == period && $0.start == date }?.id
+            },
+            set: { id in
+                guard let id, let session = sessions.first(where: { $0.id == id }) else {
+                    period = 0
+                    return
+                }
+                period = session.period
+                date = session.start
+            }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     TextField("Name (e.g. Midterm)", text: $title)
-                    DatePicker("Starts", selection: $date)
                     TextField("Room (if different)", text: $room)
                 } header: {
                     Text("Exam")
+                }
+
+                Section {
+                    Picker("Class", selection: sessionSelection) {
+                        Text("Another date and time").tag(String?.none)
+                        ForEach(sessions) { session in
+                            Text(session.title).tag(String?.some(session.id))
+                        }
+                    }
+
+                    if period == 0 {
+                        DatePicker("Starts", selection: $date)
+                    }
+                } header: {
+                    Text("When")
+                } footer: {
+                    Text(period == 0
+                         ? "Pick a class if the exam is held during one. Cancelled dates are left out."
+                         : "The exam starts when that class starts.")
                 }
 
                 Section {
@@ -132,6 +179,7 @@ struct ExamEditView: View {
         case let .create(course):
             let exam = Exam(title: trimmed, date: date, course: course)
             exam.room = room.trimmingCharacters(in: .whitespaces)
+            exam.period = period
             exam.note = note
             exam.firstReminderDaysBefore = firstReminderDaysBefore
             exam.secondReminderDaysBefore = secondReminderDaysBefore
@@ -142,6 +190,7 @@ struct ExamEditView: View {
             exam.title = trimmed
             exam.date = date
             exam.room = room.trimmingCharacters(in: .whitespaces)
+            exam.period = period
             exam.note = note
             exam.firstReminderDaysBefore = firstReminderDaysBefore
             exam.secondReminderDaysBefore = secondReminderDaysBefore

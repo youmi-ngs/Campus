@@ -10,6 +10,8 @@ final class Exam {
     /// 試験の開始日時。
     var date: Date = Date.now
     var room: String = ""
+    /// 授業の回から選んだときの限。自由入力の日時なら 0。
+    var period: Int = 0
     /// 出題範囲や持ち込みの可否など。
     var note: String = ""
 
@@ -31,7 +33,9 @@ final class Exam {
     var displayTitle: String { title.isEmpty ? "Exam" : title }
 
     var dateText: String {
-        date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).hour().minute())
+        let base = date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).hour().minute())
+        guard period > 0 else { return base }
+        return "\(base) · P\(period)"
     }
 
     /// 通知を出す日時。早い順に返す。同じ日時になるぶんはまとめる。
